@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Terrain Generation</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="terrain" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("terrain");
+        const ctx = canvas.getContext("2d");
+        const size = canvas.width;
+        const smoothness = 0.1;
+
+        const terrain = generateTerrain(size, smoothness);
+        drawTerrain(terrain);
+
+        function generateTerrain(size, smoothness) {
+            const map = new Array(size).fill(null).map(() => new Array(size).fill(0));
+
+            // Initialize the four corners with random values
+            map[0][0] = Math.random();
+            map[0][size - 1] = Math.random();
+            map[size - 1][0] = Math.random();
+            map[size - 1][size - 1] = Math.random();
+
+            diamondSquare(map, size, smoothness);
+            return map;
+        }
+
+        function diamondSquare(map, size, smoothness) {
+            for (let sideLength = size - 1; sideLength >= 2; sideLength /= 2, smoothness /= 2) {
+                const halfSide = sideLength / 2;
+
+                // Diamond step
+                for (let x = 0; x < size - 1; x += sideLength) {
+                    for (let y = 0; y < size - 1; y += sideLength) {
+                        const avg = map[x][y] + // top left
+                            map[x + sideLength][y] + // top right
+                            map[x][y + sideLength] + // bottom left
+                            map[x + sideLength][y + sideLength]; // bottom right
+                        map[x + halfSide][y + halfSide] = avg / 4 + Math.random() * smoothness * 2 - smoothness;
+                    }
+                }
+
+                // Square step
+                for (let x = 0; x < size - 1; x += halfSide) {
+                    for (let y = (x + halfSide) % sideLength; y < size - 1; y += sideLength) {
+                        const avg =
+                            map[(x - halfSide + size - 1) % (size - 1)][y] + // left of center
+                            map[(x + halfSide) % (size - 1)][y] + // right of center
+                            map[x][(y - halfSide + size - 1) % (size - 1)] + // below center
+                            map[x][(y + halfSide) % (size - 1)]; // above center
+                        map[x][y] = avg / 4 + Math.random() * smoothness * 2 - smoothness;
+                    }
+                }
+            }
+        }
+
+        function drawTerrain(terrain) {
+            const imageData = ctx.createImageData(size, size);
+            for (let x = 0; x < size; x++) {
+                for (let y = 0; y < size; y++) {
+                    const val = terrain[x][y] * 255;
+                    setPixel(imageData, x, y, val, val, val, 255);
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function setPixel(imageData, x, y, r, g, b, a) {
+            const index = (x + y * imageData.width) * 4;
+            imageData.data[index + 0] = r;
+            imageData.data[index + 1] = g;
+            imageData.data[index + 2] = b;
+            imageData.data[index + 3] = a;
+        }
+    </script>
+</body>
+</html>
