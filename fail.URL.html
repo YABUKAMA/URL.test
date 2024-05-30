@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ファイルをURLに変換する</title>
+</head>
+<body>
+    <h1>ファイルをURLに変換する</h1>
+    <input type="file" id="fileInput" accept=".txt, .pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx"><br><br>
+    <button onclick="convertToFileURL()">変換する</button><br><br>
+    <p id="fileURL"></p>
+
+    <script>
+        function convertToFileURL() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            if (file) {
+                var fileURL = URL.createObjectURL(file);
+                document.getElementById('fileURL').innerHTML = '<strong>ファイルURL:</strong> ' + fileURL;
+            } else {
+                alert('ファイルを選択してください。');
+            }
+        }
+    </script>
+</body>
+</html>
